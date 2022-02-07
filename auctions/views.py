@@ -16,6 +16,9 @@ class ListingForm(ModelForm):
     class Meta: 
         model = listing
         fields = ['title', 'description', 'image', 'starting_price', 'category']
+        widgets = {
+            'starting_price': forms.NumberInput(attrs={'step': 0.25}),
+        }
 
 class PriceForm(forms.ModelForm):
     class Meta:
@@ -101,6 +104,7 @@ def create(request):
         "form": ListingForm(),
     })
 
+@login_required(login_url='/login')
 def item_page(request, listing_id):
     l = listing.objects.get(pk=listing_id)
     b = price.objects.filter(item=l)
