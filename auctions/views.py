@@ -135,12 +135,19 @@ def item_page(request, listing_id):
             c.save()
         else:
             f = PriceForm(request.POST)
-            new_bid = f.save(commit=False)
-            if hb.get('bid__max') is not None: 
-                if high_bid > new_bid.bid:
-                    return render(request, "auctions/listing.html", {
-                        "message": "Price must be greater than current high bid."
-                    })
+            new_bid = f.save(commit=False) 
+            high_bid = float(hb.get('bid__max') or 0)
+            if high_bid > new_bid.bid or item.starting_price > new_bid.bid:
+                return render(request, "auctions/listing.html", {
+                    "message": "Price must be greater than current high bid.",
+                    "listing": item,
+                    "bid": PriceForm(),
+                    "price": high_bid,
+                    "watching": watching,
+                    "user": user,
+                    "comments": coms,
+                    "owner": item.owner
+                })
             new_bid.bidder = user
             new_bid.item = item
             new_bid.save()
