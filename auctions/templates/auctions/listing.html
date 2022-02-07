@@ -53,7 +53,7 @@
 		{% endif %}
 		<form action="/{{ listing.id }}" id="comment" method="post">
 			{% csrf_token %}
-			<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..."></textarea><br>
+			<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..." required></textarea><br>
 		<button type="submit" form="comment">Submit</button>
 		</form>
 		{% endif %}
