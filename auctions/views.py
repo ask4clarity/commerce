@@ -97,64 +97,73 @@ def create(request):
         creator = User.objects.get(username=request.user.username)
         f = ListingForm(request.POST, request.FILES)
         new_listing = f.save(commit=False)
+        new_listing.owner = creator
         new_listing.save()
-        creator.owner = new_listing
-        creator.save()
+        return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/create.html", {
         "form": ListingForm(),
     })
 
 @login_required(login_url='/login')
 def item_page(request, listing_id):
-    l = listing.objects.get(pk=listing_id)
-    b = price.objects.filter(item=l)
-    hb = b.aggregate(Max('bid'))
-    coms = l.opinions.all()
-    if hb.get('bid__max') is not None:
-        high_bid = float(hb.get('bid__max'))
-    else:
-        high_bid = hb
+    item = listing.objects.get(pk=listing_id)
+    current_prices = price.objects.filter(item=item)
+    hb = current_prices.aggregate(Max('bid'))
+    coms = item.opinions.all()
+    high_bid = float(hb.get('bid__max') or 0)
     user = User.objects.get(username=request.user.username)
-    watching = user.watching.all()
+    watching = user.watchlist.all()
     if request.method == "POST":
         if 'add' in request.POST:
-            user.watching.add(listing_id)
+            user.watchlist.add(listing_id)
         elif 'remove' in request.POST:
-            user.watching.remove(listing_id)
+            user.watchlist.remove(listing_id)
         elif 'close' in request.POST:
-            l.closed = True 
-            l.save()
-            highest = price.objects.get(bid=high_bid)
-            won = highest.bidder 
-            won.winner = l
-            won.save()
+            item.closed = True 
+            item.save()
+            if item.starting_price != high_bid and high_bid > 0:
+                highest = price.objects.get(bid=high_bid, item=item)
+                winner = highest.bidder 
+                item.winner = winner
+                item.save()
+            return HttpResponseRedirect(reverse("index"))
         elif 'content' in request.POST:
-            c = comment(comments=request.POST['content'], for_sale=l)
+            c = comment(comments=request.POST['content'], for_sale=item, user=user)
             c.save()
         else:
             f = PriceForm(request.POST)
-            new_bid = f.save(commit=False)
-            if hb.get('bid__max') is not None: 
-                if high_bid > new_bid.bid:
-                    raise ValidationError("Price must be greater than current high bid")
+            new_bid = f.save(commit=False) 
+            high_bid = float(hb.get('bid__max') or 0)
+            if high_bid > new_bid.bid or item.starting_price > new_bid.bid:
+                return render(request, "auctions/listing.html", {
+                    "message": "Price must be greater than current high bid.",
+                    "listing": item,
+                    "bid": PriceForm(),
+                    "price": high_bid,
+                    "watching": watching,
+                    "user": user,
+                    "comments": coms,
+                    "owner": item.owner
+                })
             new_bid.bidder = user
-            new_bid.item = l
+            new_bid.item = item
             new_bid.save()
+            return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/listing.html", {
-        "listing": l,
+        "listing": item,
         "bid": PriceForm(),
         "price": high_bid,
         "watching": watching,
         "user": user,
-        "comments": coms
+        "comments": coms,
+        "owner": item.owner
      })
 
 @login_required(login_url='/login')
 def watchlist(request):
     watcher = User.objects.get(username=request.user.username)
-    watching = watcher.watching.all()
     return render(request, "auctions/watchlist.html", {
-        "watching": watching
+        "watching": watcher.watchlist.all()
     })
 
 def categories(request):

@@ -8,45 +8,58 @@
 			<img src="{{ listing.image.url }}" alt="{{ listing.title }}">
 		</div>
 	{% endif %}
-	{% if user.winner == listing %}
+	{% if listing.winner == user %}
 		<h2> You won! </h2>
 	{% else %}
-		{% if listing in watching %}
-		<form action ="/{{ listing.id }}" method="post">
-			{% csrf_token %}
-			<input type="submit" name="remove" value="Remove from watchlist"/>
-		</form>
-		{% else %}
-		<form action ="/{{ listing.id }}" method="post">
-			{% csrf_token %}
-			<input type="submit" name="add" value="Add to watchlist"/>
-		</form>
-		{% endif %}
-		{% if user.owner == listing %}
-		<form action ="/{{ listing.id }}" method="post">
-			{% csrf_token %}
-			<input type="submit" name="close" value="Close listing"/>
-		</form>
-		{% endif %}
-		{% if price > listing.starting_price %}
-			Current high bid is {{ price }}
-		{% else %}
-			Starting price is {{ listing.starting_price }}
-		{% endif %}
-			<form action="/{{ listing.id }}" id="bid" method="post">
+		{% if listing.closed == False %}
+			{% if listing in watching %}
+			<form action ="/{{ listing.id }}" method="post">
 				{% csrf_token %}
-				{{ bid }}
+				<input type="submit" name="remove" value="Remove from watchlist"/>
 			</form>
-		<button type="submit" form="bid"> Bid</button>
-	{% endif %}
-	<form action="/{{ listing.id }}" id="comment" method="post">
-		{% csrf_token %}
-		<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..."></textarea><br>
-    <button type="submit" form="comment">Submit</button>
-	</form>
+			{% else %}
+			<form action ="/{{ listing.id }}" method="post">
+				{% csrf_token %}
+				<input type="submit" name="add" value="Add to watchlist"/>
+			</form>
+			{% endif %}
+			{% if user == owner %}
+			<form action ="/{{ listing.id }}" method="post">
+				{% csrf_token %}
+				<input type="submit" name="close" value="Close listing"/>
+			</form>
+			{% endif %}
+			{% if price > listing.starting_price %}
+				Current high bid is {{ price }}
+			{% else %}
+				Starting price is {{ listing.starting_price }}
+			{% endif %}
+			{% if user != owner %}
+				<form action="/{{ listing.id }}" id="bid" method="post">
+					{% csrf_token %}
+					{{ bid }}
+				</form>
+				<button type="submit" form="bid"> Bid</button>
+				{% if message %}
+				<div>{{ message }}</div>
+				{% endif %}
+			{% endif %}
+		{% else %} 
+				{% if listing.winner != None %}
+					{{ listing.winner}} won at the price of {{ price }}
+				{% else %}
+					Auction closed by {{ owner }}
+				{% endif %}
+		{% endif %}
+		<form action="/{{ listing.id }}" id="comment" method="post">
+			{% csrf_token %}
+			<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..."></textarea><br>
+		<button type="submit" form="comment">Submit</button>
+		</form>
+		{% endif %}
 	{% for comment in comments %}
 	<div>
-		{{ comment.comments }}
+		<h6>{{ comment.user }} says: {{ comment.comments }}</h1>
 	</div>
 	{% endfor %}
 	
