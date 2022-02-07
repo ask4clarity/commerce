@@ -8,7 +8,7 @@
 			<img src="{{ listing.image.url }}" alt="{{ listing.title }}">
 		</div>
 	{% endif %}
-	{% if user.winner == listing %}
+	{% if listing.winner == user %}
 		<h2> You won! </h2>
 	{% else %}
 		{% if listing in watching %}
@@ -22,7 +22,7 @@
 			<input type="submit" name="add" value="Add to watchlist"/>
 		</form>
 		{% endif %}
-		{% if user.owner == listing %}
+		{% if user == owner %}
 		<form action ="/{{ listing.id }}" method="post">
 			{% csrf_token %}
 			<input type="submit" name="close" value="Close listing"/>
@@ -43,15 +43,15 @@
 			</form>
 			<button type="submit" form="bid"> Bid</button>
 		{% endif %}
-	<form action="/{{ listing.id }}" id="comment" method="post">
-		{% csrf_token %}
-		<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..."></textarea><br>
-    <button type="submit" form="comment">Submit</button>
-	</form>
-	{% endif %}
+		<form action="/{{ listing.id }}" id="comment" method="post">
+			{% csrf_token %}
+			<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..."></textarea><br>
+		<button type="submit" form="comment">Submit</button>
+		</form>
+		{% endif %}
 	{% for comment in comments %}
 	<div>
-		<h6>Comment: {{ comment.comments }}</h1>
+		<h6>{{ comment.user }} says: {{ comment.comments }}</h1>
 	</div>
 	{% endfor %}
 	
