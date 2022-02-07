@@ -1,23 +1,35 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h1>Active Listings</h1>
+<h1>All Listings</h1>
 <div class="container-fluid">
 	<div class="row">
     {% for listing in listings %}
-    <div class="card list-details col-lg-4 col-sm-12">
-		<div class="card-body">
-			{% if listing.closed == False %}
+			<div class="card list-details col-lg-4 col-sm-12">
+				<div class="card-body">
 				<a class="nav-link card-title" href="/{{ listing.id }}"> {{ listing.title }} </a>
 				{% if listing.image %}
 					<img class="img-fluid" src="{{ listing.image.url }}" alt="{{ listing.title }}" style="max-height:300px">
-				{% endif %}
-		</div>
-				<h6 class="card-subtitle mb-2 text-muted"><strong>{{ listing.description }}</strong></h6>
-				<h6 class="card-subtitle mb-2 text-muted"> {{ listing.date }} </h6>
-			{% endif %}
+				<ul class="list-group list-group-flush">
+					<li class="list-group-item"><strong>{{ listing.description }}</strong></li>
+					{% if listing.closed == False %}
+						{% if price > listing.starting_price %}
+						<li class="list-group-item">Current high bid is {{ price }}</li>
+						{% else %}
+						<li class="list-group-item">Starting price is {{ listing.starting_price }}</li>
+						{% endif %}
+					{% else %} 
+						<li class="list-group-item">Listing closed! </li>
+					{% endif %}
+				</ul>
+				</div>
+				<div class="card-footer text-muted">
+					Started on: {{ listing.date }}
+				</div>
+			</div>
+			{% endif %} 
+
     </div>
-	</div>
 </div>
     {% endfor %}
 {% endblock %}

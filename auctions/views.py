@@ -110,10 +110,7 @@ def item_page(request, listing_id):
     current_prices = price.objects.filter(item=item)
     hb = current_prices.aggregate(Max('bid'))
     coms = item.opinions.all()
-    if hb.get('bid__max') is not None:
-        high_bid = float(hb.get('bid__max'))
-    else:
-        high_bid = hb
+    high_bid = float(hb.get('bid__max') or 0)
     user = User.objects.get(username=request.user.username)
     watching = user.watchlist.all()
     if request.method == "POST":
