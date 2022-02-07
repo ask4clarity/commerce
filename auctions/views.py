@@ -100,6 +100,7 @@ def create(request):
         new_listing.save()
         creator.owner = new_listing
         creator.save()
+        return HttpResponseRedirect(reverse("index"))
     return render(request, "auctions/create.html", {
         "form": ListingForm(),
     })
@@ -115,6 +116,7 @@ def item_page(request, listing_id):
     else:
         high_bid = hb
     user = User.objects.get(username=request.user.username)
+    owner = User.objects.get(owner=l)
     watching = user.watching.all()
     if request.method == "POST":
         if 'add' in request.POST:
@@ -124,10 +126,12 @@ def item_page(request, listing_id):
         elif 'close' in request.POST:
             l.closed = True 
             l.save()
-            highest = price.objects.get(bid=high_bid)
-            won = highest.bidder 
-            won.winner = l
-            won.save()
+            if not owner:
+                highest = price.objects.get(bid=high_bid)
+                won = highest.bidder 
+                won.winner = l
+                won.save()
+            return HttpResponseRedirect(reverse("index"))
         elif 'content' in request.POST:
             c = comment(comments=request.POST['content'], for_sale=l)
             c.save()
@@ -136,7 +140,9 @@ def item_page(request, listing_id):
             new_bid = f.save(commit=False)
             if hb.get('bid__max') is not None: 
                 if high_bid > new_bid.bid:
-                    raise ValidationError("Price must be greater than current high bid")
+                    return render(request, "auctions/listing.html", {
+                        "message": "Price must be greater than current high bid."
+                    })
             new_bid.bidder = user
             new_bid.item = l
             new_bid.save()
@@ -146,7 +152,8 @@ def item_page(request, listing_id):
         "price": high_bid,
         "watching": watching,
         "user": user,
-        "comments": coms
+        "comments": coms,
+        "owner": owner
      })
 
 @login_required(login_url='/login')

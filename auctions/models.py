@@ -24,14 +24,14 @@ class listing(models.Model):
 		return f"{self.title}"
 
 class User(AbstractUser):
-    owner = models.ForeignKey(listing, null=True, on_delete=models.CASCADE, related_name="creator")
-    winner = models.ForeignKey(listing, null=True, on_delete=models.CASCADE, related_name="top")
+    owner = models.ForeignKey(listing, null=True, on_delete=models.SET_NULL, related_name="creator")
+    winner = models.ForeignKey(listing, null=True, on_delete=models.SET_NULL, related_name="top")
     watching = models.ManyToManyField(listing, related_name="watchlist")
 
 class price(models.Model):
 	item = models.ForeignKey(listing, on_delete=models.CASCADE, related_name="items")
 	bidder = models.ForeignKey(User, null=True, on_delete=models.CASCADE, related_name="purchaser")
-	bid = models.DecimalField(max_digits=10, decimal_places=2)
+	bid = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 	
 	def __str__(self):
 		return f"{self.item} bid: {self.bid}"

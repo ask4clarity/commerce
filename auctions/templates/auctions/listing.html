@@ -33,20 +33,25 @@
 		{% else %}
 			Starting price is {{ listing.starting_price }}
 		{% endif %}
+		{% if user != owner %}
+			{% if message %}
+			<div>{{ message }}</div>
+			{% endif %}
 			<form action="/{{ listing.id }}" id="bid" method="post">
 				{% csrf_token %}
 				{{ bid }}
 			</form>
-		<button type="submit" form="bid"> Bid</button>
-	{% endif %}
+			<button type="submit" form="bid"> Bid</button>
+		{% endif %}
 	<form action="/{{ listing.id }}" id="comment" method="post">
 		{% csrf_token %}
 		<textarea form="comment" id="content" name="content" rows="4" cols="50" placeholder="Enter comment here..."></textarea><br>
     <button type="submit" form="comment">Submit</button>
 	</form>
+	{% endif %}
 	{% for comment in comments %}
 	<div>
-		{{ comment.comments }}
+		<h6>Comment: {{ comment.comments }}</h1>
 	</div>
 	{% endfor %}
 	
