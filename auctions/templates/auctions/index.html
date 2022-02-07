@@ -14,8 +14,8 @@
 				<ul class="list-group list-group-flush">
 					<li class="list-group-item"><strong>{{ listing.description }}</strong></li>
 					{% if listing.closed == False %}
-						{% if price > listing.starting_price %}
-						<li class="list-group-item">Current high bid is {{ price }}</li>
+						{% if listing.items.last.bid > listing.starting_price %}
+						<li class="list-group-item">Current high bid is {{ listing.items.last.bid }}</li>
 						{% else %}
 						<li class="list-group-item">Starting price is {{ listing.starting_price }}</li>
 						{% endif %}

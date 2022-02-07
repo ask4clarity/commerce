@@ -121,7 +121,7 @@ def item_page(request, listing_id):
         elif 'close' in request.POST:
             item.closed = True 
             item.save()
-            if item.starting_price != high_bid:
+            if item.starting_price != high_bid and high_bid > 0:
                 highest = price.objects.get(bid=high_bid, item=item)
                 winner = highest.bidder 
                 item.winner = winner
