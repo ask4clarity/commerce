@@ -107,10 +107,11 @@ def create(request):
 @login_required(login_url='/login')
 def item_page(request, listing_id):
     item = listing.objects.get(pk=listing_id)
-    current_prices = price.objects.filter(item=item)
-    hb = current_prices.aggregate(Max('bid'))
+    try:
+        high_bid = float(item.items.last().bid)
+    except:
+        high_bid = 0
     coms = item.opinions.all()
-    high_bid = float(hb.get('bid__max') or 0)
     user = User.objects.get(username=request.user.username)
     watching = user.watchlist.all()
     if request.method == "POST":
@@ -133,7 +134,6 @@ def item_page(request, listing_id):
         else:
             f = PriceForm(request.POST)
             new_bid = f.save(commit=False) 
-            high_bid = float(hb.get('bid__max') or 0)
             if high_bid > new_bid.bid or item.starting_price > new_bid.bid:
                 return render(request, "auctions/listing.html", {
                     "message": "Price must be greater than current high bid.",
