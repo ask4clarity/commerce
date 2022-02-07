@@ -1,0 +1,20 @@
+body {
+    padding: 10px;
+}
+
+img {
+ 	max-width: 20%;
+ 	height: auto;
+}
+
+h1 {
+	color: green;
+}
+
+.listing {
+	border:1px solid black;
+}
+
+.display {
+	display:inline-block;
+}

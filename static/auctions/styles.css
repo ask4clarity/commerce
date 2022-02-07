@@ -1,0 +1,12 @@
+body {
+    padding: 10px;
+}
+
+img {
+ 	max-width: 100%;
+ 	height: auto;
+}
+
+h1 {
+	color: green;
+}
